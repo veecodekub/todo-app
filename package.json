@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "rm -rf .tmp-test && tsc --module NodeNext --moduleResolution NodeNext --target ES2022 --outDir .tmp-test app/todo.ts tests/todo-create-flow.test.ts && node --test .tmp-test/tests/todo-create-flow.test.js"
   },
   "dependencies": {
     "next": "16.2.9",

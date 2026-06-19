@@ -2,18 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 
-type TodoStatus = "Open" | "Completed";
-
-type Todo = {
-  id: number;
-  title: string;
-  status: TodoStatus;
-  createdAt: number;
-};
-
-type Filter = "All" | TodoStatus;
-
-const filters: Filter[] = ["All", "Open", "Completed"];
+import { createOpenTodo, filters, type Filter, type Todo } from "./todo";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([
@@ -57,18 +46,10 @@ export default function Home() {
   function addTodo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const nextTitle = title.trim();
-    if (!nextTitle) return;
+    const nextTodo = createOpenTodo(title);
+    if (!nextTodo) return;
 
-    setTodos((currentTodos) => [
-      {
-        id: Date.now(),
-        title: nextTitle,
-        status: "Open",
-        createdAt: Date.now(),
-      },
-      ...currentTodos,
-    ]);
+    setTodos((currentTodos) => [nextTodo, ...currentTodos]);
     setTitle("");
   }
 
