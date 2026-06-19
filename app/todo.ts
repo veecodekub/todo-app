@@ -82,6 +82,10 @@ export function toggleTodoStatus(todos: Todo[], id: number): Todo[] {
   );
 }
 
+export function deleteTodo(todos: Todo[], id: number): Todo[] {
+  return todos.filter((todo) => todo.id !== id);
+}
+
 export function parseStoredTodos(storedValue: string | null): Todo[] | null {
   if (!storedValue) {
     return null;
