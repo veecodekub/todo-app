@@ -12,6 +12,7 @@ import {
 import {
   countTodosByStatus,
   createOpenTodo,
+  deleteTodo,
   filters,
   filterTodosForDisplay,
   loadTodosFromStorage,
@@ -88,6 +89,16 @@ export default function Home() {
 
   function toggleTodo(id: number) {
     setTodos((currentTodos) => toggleTodoStatus(currentTodos, id));
+  }
+
+  function removeTodo(id: number) {
+    if (editingTodoId === id) {
+      setEditingTodoId(null);
+      setEditingTitle("");
+      shouldSkipNextEditingBlur.current = false;
+    }
+
+    setTodos((currentTodos) => deleteTodo(currentTodos, id));
   }
 
   function startEditingTodo(todo: Todo) {
@@ -252,6 +263,14 @@ export default function Home() {
                 )}
                 <p className="text-sm text-stone-500">{todo.status}</p>
               </div>
+              <button
+                className="shrink-0 rounded-xl border border-stone-300 px-3 py-2 text-sm font-medium text-stone-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+                type="button"
+                aria-label={`Delete ${todo.title}`}
+                onClick={() => removeTodo(todo.id)}
+              >
+                Delete
+              </button>
             </li>
           ))}
         </ul>

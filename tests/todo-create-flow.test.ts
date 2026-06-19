@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   countTodosByStatus,
   createOpenTodo,
+  deleteTodo,
   filterTodosForDisplay,
   loadTodosFromStorage,
   parseStoredTodos,
@@ -206,11 +207,55 @@ test("summarizes Open and Completed Todo counts after create, toggle, delete, an
   todos = toggleTodoStatus(todos, 802);
   assert.deepEqual(countTodosByStatus(todos), { Open: 2, Completed: 1 });
 
-  todos = todos.filter((todo) => todo.id !== 801);
+  todos = deleteTodo(todos, 801);
   assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 1 });
 
   todos = todos.filter((todo) => todo.status !== "Completed");
   assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 0 });
+});
+
+test("permanently deletes individual Open and Completed Todos", () => {
+  const todos: Todo[] = [
+    { id: 1001, title: "Open task", status: "Open", createdAt: 1001 },
+    { id: 1002, title: "Completed task", status: "Completed", createdAt: 1002 },
+    { id: 1003, title: "Keep task", status: "Open", createdAt: 1003 },
+  ];
+
+  const withoutOpen = deleteTodo(todos, 1001);
+  assert.deepEqual(
+    withoutOpen.map((todo) => todo.title),
+    ["Completed task", "Keep task"],
+  );
+  assert.deepEqual(countTodosByStatus(withoutOpen), { Open: 1, Completed: 1 });
+
+  const withoutCompleted = deleteTodo(withoutOpen, 1002);
+  assert.deepEqual(
+    filterTodosForDisplay(withoutCompleted, "All").map((todo) => todo.title),
+    ["Keep task"],
+  );
+  assert.deepEqual(countTodosByStatus(withoutCompleted), {
+    Open: 1,
+    Completed: 0,
+  });
+});
+
+test("keeps deleted Todos out of persisted browser storage", () => {
+  const storage = createMemoryStorage();
+  const todos: Todo[] = [
+    { id: 1011, title: "Persisted Open", status: "Open", createdAt: 1011 },
+    {
+      id: 1012,
+      title: "Deleted Completed",
+      status: "Completed",
+      createdAt: 1012,
+    },
+  ];
+
+  saveTodosToStorage(storage, deleteTodo(todos, 1012));
+
+  assert.deepEqual(loadTodosFromStorage(storage), [
+    { id: 1011, title: "Persisted Open", status: "Open", createdAt: 1011 },
+  ]);
 });
 
 test("updates a Todo Title from valid inline edit text", () => {
