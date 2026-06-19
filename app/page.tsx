@@ -7,6 +7,7 @@ import {
   filters,
   loadTodosFromStorage,
   saveTodosToStorage,
+  sortTodosForDisplay,
   toggleTodoStatus,
   type Filter,
   type Todo,
@@ -61,15 +62,9 @@ export default function Home() {
   const completedCount = todos.length - openCount;
 
   const visibleTodos = useMemo(() => {
-    return todos
-      .filter((todo) => filter === "All" || todo.status === filter)
-      .sort((a, b) => {
-        if (a.status !== b.status) {
-          return a.status === "Open" ? -1 : 1;
-        }
-
-        return b.createdAt - a.createdAt;
-      });
+    return sortTodosForDisplay(
+      todos.filter((todo) => filter === "All" || todo.status === filter),
+    );
   }, [filter, todos]);
 
   function addTodo(event: FormEvent<HTMLFormElement>) {
