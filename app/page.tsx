@@ -148,17 +148,17 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-stone-100 px-4 py-6 text-stone-950 sm:px-6 lg:px-8">
-      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+      <section className="mx-auto flex w-full max-w-3xl min-w-0 flex-col gap-5 rounded-[1.5rem] border border-stone-200 bg-white p-4 shadow-sm sm:gap-6 sm:rounded-[2rem] sm:p-8">
         <header className="flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
+          <div className="min-w-0">
+            <p className="text-wrap text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
               Personal Todo
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
               Todo
             </h1>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-56">
+          <div className="grid w-full grid-cols-2 gap-2 text-sm sm:w-auto sm:min-w-56">
             <div className="rounded-2xl bg-stone-100 p-3">
               <p className="text-stone-500">Open</p>
               <p className="text-2xl font-semibold">{todoSummaryCounts.Open}</p>
@@ -178,13 +178,13 @@ export default function Home() {
           </label>
           <input
             id="todo-title"
-            className="min-h-12 flex-1 rounded-2xl border border-stone-300 bg-white px-4 text-base outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
+            className="min-h-12 min-w-0 flex-1 rounded-2xl border border-stone-300 bg-white px-4 text-base outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
             placeholder="Add a Todo Title"
             value={title}
             onChange={(event) => setTitle(event.target.value)}
           />
           <button
-            className="min-h-12 rounded-2xl bg-stone-950 px-5 font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+            className="min-h-12 rounded-2xl bg-stone-950 px-5 font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300 sm:shrink-0"
             type="submit"
             disabled={!title.trim()}
           >
@@ -193,7 +193,7 @@ export default function Home() {
         </form>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex rounded-2xl bg-stone-100 p-1">
+          <div className="grid w-full grid-cols-3 rounded-2xl bg-stone-100 p-1 sm:flex sm:w-auto">
             {filters.map((nextFilter) => (
               <button
                 key={nextFilter}
@@ -210,7 +210,7 @@ export default function Home() {
             ))}
           </div>
           <button
-            className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40 sm:shrink-0"
             type="button"
             disabled={todoSummaryCounts.Completed === 0}
             onClick={() =>
@@ -222,13 +222,13 @@ export default function Home() {
         </div>
 
         <ul
-          className="flex flex-col gap-3 max-h-[50vh] overflow-auto"
+          className="flex max-h-[50vh] flex-col gap-3 overflow-auto"
           aria-label="Todo list"
         >
           {visibleTodos.map((todo) => (
             <li
               key={todo.id}
-              className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-xs"
+              className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-2xl border border-stone-200 bg-white p-3 shadow-xs sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:p-4"
             >
               <button
                 className={`flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition ${
@@ -247,7 +247,7 @@ export default function Home() {
               <div className="min-w-0 flex-1">
                 {editingTodoId === todo.id ? (
                   <input
-                    className="w-full font-medium text-stone-950 outline-none"
+                    className="min-h-10 w-full min-w-0 rounded-xl border border-stone-300 px-3 font-medium text-stone-950 outline-none focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
                     aria-label={`Edit Title for ${todo.title}`}
                     value={editingTitle}
                     autoFocus
@@ -272,7 +272,7 @@ export default function Home() {
                 <p className="text-sm text-stone-500">{todo.status}</p>
               </div>
               <button
-                className="shrink-0 rounded-xl border border-stone-300 px-3 py-2 text-sm font-medium text-stone-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100"
+                className="col-start-2 w-full rounded-xl border border-stone-300 px-3 py-2 text-sm font-medium text-stone-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-700 focus:outline-none focus:ring-4 focus:ring-red-100 sm:col-start-auto sm:w-auto sm:shrink-0"
                 type="button"
                 aria-label={`Delete ${todo.title}`}
                 onClick={() => removeTodo(todo.id)}
