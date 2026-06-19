@@ -10,6 +10,7 @@ export type Todo = {
 export type Filter = "All" | TodoStatus;
 
 export const filters: Filter[] = ["All", "Open", "Completed"];
+export const todosStorageKey = "personal-todo.todos.v1";
 
 export function createOpenTodo(title: string, timestamp = Date.now()): Todo | null {
   const trimmedTitle = title.trim();
@@ -24,4 +25,53 @@ export function createOpenTodo(title: string, timestamp = Date.now()): Todo | nu
     status: "Open",
     createdAt: timestamp,
   };
+}
+
+export function parseStoredTodos(storedValue: string | null): Todo[] | null {
+  if (!storedValue) {
+    return null;
+  }
+
+  try {
+    const parsedValue: unknown = JSON.parse(storedValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return null;
+    }
+
+    const todos = parsedValue.filter(isTodo);
+
+    return todos.length === parsedValue.length ? todos : null;
+  } catch {
+    return null;
+  }
+}
+
+export function loadTodosFromStorage(storage: Pick<Storage, "getItem">): Todo[] | null {
+  return parseStoredTodos(storage.getItem(todosStorageKey));
+}
+
+export function saveTodosToStorage(
+  storage: Pick<Storage, "setItem">,
+  todos: Todo[],
+): void {
+  storage.setItem(todosStorageKey, JSON.stringify(todos));
+}
+
+function isTodo(value: unknown): value is Todo {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const possibleTodo = value as Record<string, unknown>;
+
+  return (
+    typeof possibleTodo.id === "number" &&
+    Number.isFinite(possibleTodo.id) &&
+    typeof possibleTodo.title === "string" &&
+    possibleTodo.title.trim().length > 0 &&
+    (possibleTodo.status === "Open" || possibleTodo.status === "Completed") &&
+    typeof possibleTodo.createdAt === "number" &&
+    Number.isFinite(possibleTodo.createdAt)
+  );
 }
