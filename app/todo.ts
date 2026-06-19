@@ -55,6 +55,22 @@ export function createOpenTodo(title: string, timestamp = Date.now()): Todo | nu
   };
 }
 
+export function updateTodoTitle(
+  todos: Todo[],
+  id: number,
+  title: string,
+): Todo[] {
+  const trimmedTitle = title.trim();
+
+  if (!trimmedTitle) {
+    return todos;
+  }
+
+  return todos.map((todo) =>
+    todo.id === id ? { ...todo, title: trimmedTitle } : todo,
+  );
+}
+
 export function toggleTodoStatus(todos: Todo[], id: number): Todo[] {
   return todos.map((todo) =>
     todo.id === id

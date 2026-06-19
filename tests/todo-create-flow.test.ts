@@ -10,6 +10,7 @@ import {
   saveTodosToStorage,
   sortTodosForDisplay,
   toggleTodoStatus,
+  updateTodoTitle,
   todosStorageKey,
   type Todo,
 } from "../app/todo";
@@ -210,6 +211,26 @@ test("summarizes Open and Completed Todo counts after create, toggle, delete, an
 
   todos = todos.filter((todo) => todo.status !== "Completed");
   assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 0 });
+});
+
+test("updates a Todo Title from valid inline edit text", () => {
+  const todos: Todo[] = [
+    { id: 901, title: "Draft plan", status: "Open", createdAt: 901 },
+    { id: 902, title: "Keep this", status: "Completed", createdAt: 902 },
+  ];
+
+  const nextTodos = updateTodoTitle(todos, 901, "  Final plan  ");
+
+  assert.equal(nextTodos[0].title, "Final plan");
+  assert.equal(nextTodos[1].title, "Keep this");
+});
+
+test("does not overwrite the old Title when inline edit text is blank", () => {
+  const todos: Todo[] = [
+    { id: 911, title: "Original Title", status: "Open", createdAt: 911 },
+  ];
+
+  assert.deepEqual(updateTodoTitle(todos, 911, "   \n\t  "), todos);
 });
 
 function createMemoryStorage(): Pick<Storage, "getItem" | "setItem"> {
