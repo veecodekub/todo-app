@@ -1,6 +1,13 @@
 "use client";
 
-import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import {
   countTodosByStatus,
@@ -41,6 +48,7 @@ export default function Home() {
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [hasLoadedStoredTodos, setHasLoadedStoredTodos] = useState(false);
+  const shouldSkipNextEditingBlur = useRef(false);
 
   useEffect(() => {
     const loadStoredTodos = window.setTimeout(() => {
@@ -83,11 +91,17 @@ export default function Home() {
   }
 
   function startEditingTodo(todo: Todo) {
+    shouldSkipNextEditingBlur.current = false;
     setEditingTodoId(todo.id);
     setEditingTitle(todo.title);
   }
 
   function saveEditingTodo() {
+    if (shouldSkipNextEditingBlur.current) {
+      shouldSkipNextEditingBlur.current = false;
+      return;
+    }
+
     if (editingTodoId === null) return;
 
     setTodos((currentTodos) =>
@@ -97,7 +111,19 @@ export default function Home() {
     setEditingTitle("");
   }
 
+  function cancelEditingTodo() {
+    shouldSkipNextEditingBlur.current = true;
+    setEditingTodoId(null);
+    setEditingTitle("");
+  }
+
   function handleEditingKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelEditingTodo();
+      return;
+    }
+
     if (event.key !== "Enter") return;
 
     event.preventDefault();
