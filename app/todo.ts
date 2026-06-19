@@ -12,6 +12,17 @@ export type Filter = "All" | TodoStatus;
 export const filters: Filter[] = ["All", "Open", "Completed"];
 export const todosStorageKey = "personal-todo.todos.v1";
 
+
+export function sortTodosForDisplay(todos: Todo[]): Todo[] {
+  return [...todos].sort((a, b) => {
+    if (a.status !== b.status) {
+      return a.status === "Open" ? -1 : 1;
+    }
+
+    return b.createdAt - a.createdAt;
+  });
+}
+
 export function createOpenTodo(title: string, timestamp = Date.now()): Todo | null {
   const trimmedTitle = title.trim();
 

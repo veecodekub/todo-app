@@ -6,6 +6,7 @@ import {
   loadTodosFromStorage,
   parseStoredTodos,
   saveTodosToStorage,
+  sortTodosForDisplay,
   toggleTodoStatus,
   todosStorageKey,
   type Todo,
@@ -106,6 +107,50 @@ test("treats empty, old, or unreadable storage as no persisted Todos", () => {
       ]),
     ),
     null,
+  );
+});
+
+test("sorts Open Todos before Completed Todos with newest first in each state", () => {
+  const todos: Todo[] = [
+    { id: 401, title: "Older completed", status: "Completed", createdAt: 401 },
+    { id: 404, title: "Newest open", status: "Open", createdAt: 404 },
+    { id: 402, title: "Older open", status: "Open", createdAt: 402 },
+    { id: 405, title: "Newest completed", status: "Completed", createdAt: 405 },
+  ];
+
+  assert.deepEqual(
+    sortTodosForDisplay(todos).map((todo) => todo.title),
+    ["Newest open", "Older open", "Newest completed", "Older completed"],
+  );
+});
+
+test("keeps ordering correct after creating and toggling Todos", () => {
+  const olderOpen = createOpenTodo("Older open", 501)!;
+  const newerOpen = createOpenTodo("Newer open", 502)!;
+  const completedNewest = toggleTodoStatus(
+    [createOpenTodo("Completed newest", 503)!],
+    503,
+  )[0];
+  const completedOlder = toggleTodoStatus(
+    [createOpenTodo("Completed older", 500)!],
+    500,
+  )[0];
+
+  const sortedTodos = sortTodosForDisplay([
+    completedNewest,
+    olderOpen,
+    completedOlder,
+    newerOpen,
+  ]);
+
+  assert.deepEqual(
+    sortedTodos.map((todo) => `${todo.status}: ${todo.title}`),
+    [
+      "Open: Newer open",
+      "Open: Older open",
+      "Completed: Completed newest",
+      "Completed: Completed older",
+    ],
   );
 });
 
