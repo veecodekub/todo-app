@@ -1,65 +1,207 @@
-import Image from "next/image";
+"use client";
+
+import { FormEvent, useMemo, useState } from "react";
+
+type TodoStatus = "Open" | "Completed";
+
+type Todo = {
+  id: number;
+  title: string;
+  status: TodoStatus;
+  createdAt: number;
+};
+
+type Filter = "All" | TodoStatus;
+
+const filters: Filter[] = ["All", "Open", "Completed"];
 
 export default function Home() {
+  const [todos, setTodos] = useState<Todo[]>([
+    {
+      id: 1,
+      title: "Review today’s priorities",
+      status: "Open",
+      createdAt: 3,
+    },
+    {
+      id: 2,
+      title: "Capture one quick win",
+      status: "Open",
+      createdAt: 2,
+    },
+    {
+      id: 3,
+      title: "Clear yesterday’s notes",
+      status: "Completed",
+      createdAt: 1,
+    },
+  ]);
+  const [title, setTitle] = useState("");
+  const [filter, setFilter] = useState<Filter>("All");
+
+  const openCount = todos.filter((todo) => todo.status === "Open").length;
+  const completedCount = todos.length - openCount;
+
+  const visibleTodos = useMemo(() => {
+    return todos
+      .filter((todo) => filter === "All" || todo.status === filter)
+      .sort((a, b) => {
+        if (a.status !== b.status) {
+          return a.status === "Open" ? -1 : 1;
+        }
+
+        return b.createdAt - a.createdAt;
+      });
+  }, [filter, todos]);
+
+  function addTodo(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextTitle = title.trim();
+    if (!nextTitle) return;
+
+    setTodos((currentTodos) => [
+      {
+        id: Date.now(),
+        title: nextTitle,
+        status: "Open",
+        createdAt: Date.now(),
+      },
+      ...currentTodos,
+    ]);
+    setTitle("");
+  }
+
+  function toggleTodo(id: number) {
+    setTodos((currentTodos) =>
+      currentTodos.map((todo) =>
+        todo.id === id
+          ? {
+              ...todo,
+              status: todo.status === "Open" ? "Completed" : "Open",
+            }
+          : todo,
+      ),
+    );
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <main className="min-h-screen bg-stone-100 px-4 py-6 text-stone-950 sm:px-6 lg:px-8">
+      <section className="mx-auto flex w-full max-w-3xl flex-col gap-6 rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm sm:p-8">
+        <header className="flex flex-col gap-4 border-b border-stone-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-[0.2em] text-stone-500">
+              Personal Todo
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+              Todo
+            </h1>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-56">
+            <div className="rounded-2xl bg-stone-100 p-3">
+              <p className="text-stone-500">Open</p>
+              <p className="text-2xl font-semibold">{openCount}</p>
+            </div>
+            <div className="rounded-2xl bg-stone-100 p-3">
+              <p className="text-stone-500">Completed</p>
+              <p className="text-2xl font-semibold">{completedCount}</p>
+            </div>
+          </div>
+        </header>
+
+        <form className="flex flex-col gap-3 sm:flex-row" onSubmit={addTodo}>
+          <label className="sr-only" htmlFor="todo-title">
+            Todo Title
+          </label>
+          <input
+            id="todo-title"
+            className="min-h-12 flex-1 rounded-2xl border border-stone-300 bg-white px-4 text-base outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
+            placeholder="Add a Todo Title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+          />
+          <button
+            className="min-h-12 rounded-2xl bg-stone-950 px-5 font-medium text-white transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:bg-stone-300"
+            type="submit"
+            disabled={!title.trim()}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            Add Todo
+          </button>
+        </form>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex rounded-2xl bg-stone-100 p-1">
+            {filters.map((nextFilter) => (
+              <button
+                key={nextFilter}
+                className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition sm:flex-none ${
+                  filter === nextFilter
+                    ? "bg-white text-stone-950 shadow-sm"
+                    : "text-stone-500 hover:text-stone-950"
+                }`}
+                type="button"
+                onClick={() => setFilter(nextFilter)}
+              >
+                {nextFilter}
+              </button>
+            ))}
+          </div>
+          <button
+            className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
+            type="button"
+            disabled={completedCount === 0}
+            onClick={() =>
+              setTodos((currentTodos) =>
+                currentTodos.filter((todo) => todo.status !== "Completed"),
+              )
+            }
           >
-            Documentation
-          </a>
+            Clear completed
+          </button>
         </div>
-      </main>
-    </div>
+
+        <ul className="flex flex-col gap-3" aria-label="Todo list">
+          {visibleTodos.map((todo) => (
+            <li
+              key={todo.id}
+              className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-xs"
+            >
+              <button
+                className={`flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-bold transition ${
+                  todo.status === "Completed"
+                    ? "border-stone-950 bg-stone-950 text-white"
+                    : "border-stone-300 text-transparent hover:border-stone-950"
+                }`}
+                type="button"
+                aria-label={`Mark ${todo.title} as ${
+                  todo.status === "Open" ? "Completed" : "Open"
+                }`}
+                onClick={() => toggleTodo(todo.id)}
+              >
+                ✓
+              </button>
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`truncate font-medium ${
+                    todo.status === "Completed"
+                      ? "text-stone-400 line-through"
+                      : "text-stone-950"
+                  }`}
+                >
+                  {todo.title}
+                </p>
+                <p className="text-sm text-stone-500">{todo.status}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {visibleTodos.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-stone-300 p-8 text-center text-stone-500">
+            No Todos to show for {filter}.
+          </div>
+        ) : null}
+      </section>
+    </main>
   );
 }
