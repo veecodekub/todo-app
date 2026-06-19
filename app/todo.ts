@@ -12,6 +12,11 @@ export type Filter = "All" | TodoStatus;
 export const filters: Filter[] = ["All", "Open", "Completed"];
 export const todosStorageKey = "personal-todo.todos.v1";
 
+export function filterTodosForDisplay(todos: Todo[], filter: Filter): Todo[] {
+  return sortTodosForDisplay(
+    todos.filter((todo) => filter === "All" || todo.status === filter),
+  );
+}
 
 export function sortTodosForDisplay(todos: Todo[]): Todo[] {
   return [...todos].sort((a, b) => {

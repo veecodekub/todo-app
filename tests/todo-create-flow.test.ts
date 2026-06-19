@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createOpenTodo,
+  filterTodosForDisplay,
   loadTodosFromStorage,
   parseStoredTodos,
   saveTodosToStorage,
@@ -151,6 +152,44 @@ test("keeps ordering correct after creating and toggling Todos", () => {
       "Completed: Completed newest",
       "Completed: Completed older",
     ],
+  );
+});
+
+test("filters the visible Todo list by All, Open, and Completed", () => {
+  const todos: Todo[] = [
+    { id: 601, title: "Older completed", status: "Completed", createdAt: 601 },
+    { id: 604, title: "Newest open", status: "Open", createdAt: 604 },
+    { id: 602, title: "Older open", status: "Open", createdAt: 602 },
+    { id: 605, title: "Newest completed", status: "Completed", createdAt: 605 },
+  ];
+
+  assert.deepEqual(
+    filterTodosForDisplay(todos, "All").map((todo) => todo.title),
+    ["Newest open", "Older open", "Newest completed", "Older completed"],
+  );
+  assert.deepEqual(
+    filterTodosForDisplay(todos, "Open").map((todo) => todo.title),
+    ["Newest open", "Older open"],
+  );
+  assert.deepEqual(
+    filterTodosForDisplay(todos, "Completed").map((todo) => todo.title),
+    ["Newest completed", "Older completed"],
+  );
+});
+
+test("reflects create and toggle behavior in the current filter", () => {
+  const firstOpen = createOpenTodo("First Open", 701)!;
+  const secondOpen = createOpenTodo("Second Open", 702)!;
+  const completedTodo = toggleTodoStatus([firstOpen, secondOpen], 701)[0];
+  const todos = [completedTodo, secondOpen];
+
+  assert.deepEqual(
+    filterTodosForDisplay(todos, "Open").map((todo) => todo.title),
+    ["Second Open"],
+  );
+  assert.deepEqual(
+    filterTodosForDisplay(todos, "Completed").map((todo) => todo.title),
+    ["First Open"],
   );
 });
 
