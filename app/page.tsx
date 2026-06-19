@@ -165,7 +165,9 @@ export default function Home() {
             </div>
             <div className="rounded-2xl bg-stone-100 p-3">
               <p className="text-stone-500">Completed</p>
-              <p className="text-2xl font-semibold">{todoSummaryCounts.Completed}</p>
+              <p className="text-2xl font-semibold">
+                {todoSummaryCounts.Completed}
+              </p>
             </div>
           </div>
         </header>
@@ -211,13 +213,18 @@ export default function Home() {
             className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
             type="button"
             disabled={todoSummaryCounts.Completed === 0}
-            onClick={() => setTodos((currentTodos) => clearCompletedTodos(currentTodos))}
+            onClick={() =>
+              setTodos((currentTodos) => clearCompletedTodos(currentTodos))
+            }
           >
             Clear completed
           </button>
         </div>
 
-        <ul className="flex flex-col gap-3" aria-label="Todo list">
+        <ul
+          className="flex flex-col gap-3 max-h-[50vh] overflow-auto"
+          aria-label="Todo list"
+        >
           {visibleTodos.map((todo) => (
             <li
               key={todo.id}
@@ -240,7 +247,7 @@ export default function Home() {
               <div className="min-w-0 flex-1">
                 {editingTodoId === todo.id ? (
                   <input
-                    className="min-h-10 w-full rounded-xl border border-stone-300 bg-white px-3 font-medium text-stone-950 outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
+                    className="w-full font-medium text-stone-950 outline-none"
                     aria-label={`Edit Title for ${todo.title}`}
                     value={editingTitle}
                     autoFocus
@@ -250,10 +257,10 @@ export default function Home() {
                   />
                 ) : (
                   <button
-                    className={`block max-w-full truncate text-left font-medium underline-offset-4 transition hover:underline focus:outline-none focus:ring-4 focus:ring-stone-200 ${
+                    className={`block max-w-full truncate text-left font-medium underline-offset-4 transition focus:outline-none focus:ring-4 focus:ring-stone-200 ${
                       todo.status === "Completed"
                         ? "text-stone-400 line-through"
-                        : "text-stone-950"
+                        : "text-stone-950 hover:underline"
                     }`}
                     type="button"
                     aria-label={`Edit Title for ${todo.title}`}
