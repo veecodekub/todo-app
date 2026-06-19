@@ -7,6 +7,7 @@ import {
   createOpenTodo,
   deleteTodo,
   filterTodosForDisplay,
+  getEmptyStateMessage,
   loadTodosFromStorage,
   parseStoredTodos,
   saveTodosToStorage,
@@ -333,4 +334,28 @@ test("clear completed is a no-op when there are no Completed Todos", () => {
 
   assert.deepEqual(clearCompletedTodos(todos), todos);
   assert.equal(countTodosByStatus(todos).Completed, 0);
+});
+
+test("shows a specific empty state when there are no Todos yet", () => {
+  assert.equal(getEmptyStateMessage([], "All"), "No Todos yet.");
+  assert.equal(getEmptyStateMessage([], "Open"), "No Todos yet.");
+  assert.equal(getEmptyStateMessage([], "Completed"), "No Todos yet.");
+});
+
+test("shows filter-specific empty states when a filtered list has no matches", () => {
+  const openOnlyTodos: Todo[] = [
+    { id: 1401, title: "Only Open", status: "Open", createdAt: 1401 },
+  ];
+  const completedOnlyTodos: Todo[] = [
+    {
+      id: 1402,
+      title: "Only Completed",
+      status: "Completed",
+      createdAt: 1402,
+    },
+  ];
+
+  assert.equal(getEmptyStateMessage(openOnlyTodos, "Completed"), "No Completed Todos.");
+  assert.equal(getEmptyStateMessage(completedOnlyTodos, "Open"), "No Open Todos.");
+  assert.equal(getEmptyStateMessage(openOnlyTodos, "All"), null);
 });

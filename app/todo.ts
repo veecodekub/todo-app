@@ -14,6 +14,22 @@ export const todosStorageKey = "personal-todo.todos.v1";
 
 export type TodoSummaryCounts = Record<TodoStatus, number>;
 
+export function getEmptyStateMessage(todos: Todo[], filter: Filter): string | null {
+  if (todos.length === 0) {
+    return "No Todos yet.";
+  }
+
+  if (filter === "Open") {
+    return "No Open Todos.";
+  }
+
+  if (filter === "Completed") {
+    return "No Completed Todos.";
+  }
+
+  return null;
+}
+
 export function countTodosByStatus(todos: Todo[]): TodoSummaryCounts {
   return todos.reduce<TodoSummaryCounts>(
     (counts, todo) => ({
