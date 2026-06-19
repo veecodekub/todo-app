@@ -7,6 +7,7 @@ import {
   filters,
   loadTodosFromStorage,
   saveTodosToStorage,
+  toggleTodoStatus,
   type Filter,
   type Todo,
 } from "./todo";
@@ -82,16 +83,7 @@ export default function Home() {
   }
 
   function toggleTodo(id: number) {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === id
-          ? {
-              ...todo,
-              status: todo.status === "Open" ? "Completed" : "Open",
-            }
-          : todo,
-      ),
-    );
+    setTodos((currentTodos) => toggleTodoStatus(currentTodos, id));
   }
 
   return (

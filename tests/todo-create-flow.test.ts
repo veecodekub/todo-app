@@ -6,6 +6,7 @@ import {
   loadTodosFromStorage,
   parseStoredTodos,
   saveTodosToStorage,
+  toggleTodoStatus,
   todosStorageKey,
   type Todo,
 } from "../app/todo";
@@ -40,6 +41,45 @@ test("allows duplicate Titles to produce separate Open Todos", () => {
   assert.equal(duplicateTodo?.status, "Open");
   assert.equal(duplicateTodo?.title, existingTodos[0].title);
   assert.notEqual(duplicateTodo?.id, existingTodos[0].id);
+});
+
+test("marks an Open Todo as Completed while keeping it visible", () => {
+  const todos: Todo[] = [
+    { id: 110, title: "Check inbox", status: "Open", createdAt: 110 },
+    { id: 111, title: "Update notes", status: "Open", createdAt: 111 },
+  ];
+
+  const nextTodos = toggleTodoStatus(todos, 110);
+
+  assert.equal(nextTodos.length, 2);
+  assert.deepEqual(nextTodos[0], {
+    id: 110,
+    title: "Check inbox",
+    status: "Completed",
+    createdAt: 110,
+  });
+  assert.equal(nextTodos[1].status, "Open");
+});
+
+test("marks a Completed Todo back as Open", () => {
+  const todos: Todo[] = [
+    { id: 120, title: "Fix typo", status: "Completed", createdAt: 120 },
+  ];
+
+  const nextTodos = toggleTodoStatus(todos, 120);
+
+  assert.deepEqual(nextTodos, [
+    { id: 120, title: "Fix typo", status: "Open", createdAt: 120 },
+  ]);
+});
+
+test("leaves visible Todos unchanged when toggling an unknown Todo", () => {
+  const todos: Todo[] = [
+    { id: 130, title: "Plan week", status: "Open", createdAt: 130 },
+    { id: 131, title: "Archive receipt", status: "Completed", createdAt: 131 },
+  ];
+
+  assert.deepEqual(toggleTodoStatus(todos, 999), todos);
 });
 
 test("saves and reloads persisted Todo Titles and states from browser storage", () => {
