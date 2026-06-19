@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 import {
+  countTodosByStatus,
   createOpenTodo,
   filters,
   filterTodosForDisplay,
@@ -58,8 +59,7 @@ export default function Home() {
     saveTodosToStorage(window.localStorage, todos);
   }, [hasLoadedStoredTodos, todos]);
 
-  const openCount = todos.filter((todo) => todo.status === "Open").length;
-  const completedCount = todos.length - openCount;
+  const todoSummaryCounts = useMemo(() => countTodosByStatus(todos), [todos]);
 
   const visibleTodos = useMemo(() => {
     return filterTodosForDisplay(todos, filter);
@@ -94,11 +94,11 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-2 text-sm sm:min-w-56">
             <div className="rounded-2xl bg-stone-100 p-3">
               <p className="text-stone-500">Open</p>
-              <p className="text-2xl font-semibold">{openCount}</p>
+              <p className="text-2xl font-semibold">{todoSummaryCounts.Open}</p>
             </div>
             <div className="rounded-2xl bg-stone-100 p-3">
               <p className="text-stone-500">Completed</p>
-              <p className="text-2xl font-semibold">{completedCount}</p>
+              <p className="text-2xl font-semibold">{todoSummaryCounts.Completed}</p>
             </div>
           </div>
         </header>
@@ -143,7 +143,7 @@ export default function Home() {
           <button
             className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
             type="button"
-            disabled={completedCount === 0}
+            disabled={todoSummaryCounts.Completed === 0}
             onClick={() =>
               setTodos((currentTodos) =>
                 currentTodos.filter((todo) => todo.status !== "Completed"),

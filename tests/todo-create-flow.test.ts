@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  countTodosByStatus,
   createOpenTodo,
   filterTodosForDisplay,
   loadTodosFromStorage,
@@ -191,6 +192,24 @@ test("reflects create and toggle behavior in the current filter", () => {
     filterTodosForDisplay(todos, "Completed").map((todo) => todo.title),
     ["First Open"],
   );
+});
+
+test("summarizes Open and Completed Todo counts after create, toggle, delete, and clear", () => {
+  const firstOpen = createOpenTodo("Plan sprint", 801)!;
+  const secondOpen = createOpenTodo("Review PR", 802)!;
+  const thirdOpen = createOpenTodo("Write notes", 803)!;
+
+  let todos: Todo[] = [thirdOpen, secondOpen, firstOpen];
+  assert.deepEqual(countTodosByStatus(todos), { Open: 3, Completed: 0 });
+
+  todos = toggleTodoStatus(todos, 802);
+  assert.deepEqual(countTodosByStatus(todos), { Open: 2, Completed: 1 });
+
+  todos = todos.filter((todo) => todo.id !== 801);
+  assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 1 });
+
+  todos = todos.filter((todo) => todo.status !== "Completed");
+  assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 0 });
 });
 
 function createMemoryStorage(): Pick<Storage, "getItem" | "setItem"> {
