@@ -27,6 +27,17 @@ export function createOpenTodo(title: string, timestamp = Date.now()): Todo | nu
   };
 }
 
+export function toggleTodoStatus(todos: Todo[], id: number): Todo[] {
+  return todos.map((todo) =>
+    todo.id === id
+      ? {
+          ...todo,
+          status: todo.status === "Open" ? "Completed" : "Open",
+        }
+      : todo,
+  );
+}
+
 export function parseStoredTodos(storedValue: string | null): Todo[] | null {
   if (!storedValue) {
     return null;
