@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 
 import {
   countTodosByStatus,
@@ -10,6 +10,7 @@ import {
   loadTodosFromStorage,
   saveTodosToStorage,
   toggleTodoStatus,
+  updateTodoTitle,
   type Filter,
   type Todo,
 } from "./todo";
@@ -37,6 +38,8 @@ export default function Home() {
   ]);
   const [title, setTitle] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
+  const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
   const [hasLoadedStoredTodos, setHasLoadedStoredTodos] = useState(false);
 
   useEffect(() => {
@@ -77,6 +80,28 @@ export default function Home() {
 
   function toggleTodo(id: number) {
     setTodos((currentTodos) => toggleTodoStatus(currentTodos, id));
+  }
+
+  function startEditingTodo(todo: Todo) {
+    setEditingTodoId(todo.id);
+    setEditingTitle(todo.title);
+  }
+
+  function saveEditingTodo() {
+    if (editingTodoId === null) return;
+
+    setTodos((currentTodos) =>
+      updateTodoTitle(currentTodos, editingTodoId, editingTitle),
+    );
+    setEditingTodoId(null);
+    setEditingTitle("");
+  }
+
+  function handleEditingKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+
+    event.preventDefault();
+    saveEditingTodo();
   }
 
   return (
@@ -175,15 +200,30 @@ export default function Home() {
                 ✓
               </button>
               <div className="min-w-0 flex-1">
-                <p
-                  className={`truncate font-medium ${
-                    todo.status === "Completed"
-                      ? "text-stone-400 line-through"
-                      : "text-stone-950"
-                  }`}
-                >
-                  {todo.title}
-                </p>
+                {editingTodoId === todo.id ? (
+                  <input
+                    className="min-h-10 w-full rounded-xl border border-stone-300 bg-white px-3 font-medium text-stone-950 outline-none transition focus:border-stone-900 focus:ring-4 focus:ring-stone-200"
+                    aria-label={`Edit Title for ${todo.title}`}
+                    value={editingTitle}
+                    autoFocus
+                    onChange={(event) => setEditingTitle(event.target.value)}
+                    onBlur={saveEditingTodo}
+                    onKeyDown={handleEditingKeyDown}
+                  />
+                ) : (
+                  <button
+                    className={`block max-w-full truncate text-left font-medium underline-offset-4 transition hover:underline focus:outline-none focus:ring-4 focus:ring-stone-200 ${
+                      todo.status === "Completed"
+                        ? "text-stone-400 line-through"
+                        : "text-stone-950"
+                    }`}
+                    type="button"
+                    aria-label={`Edit Title for ${todo.title}`}
+                    onClick={() => startEditingTodo(todo)}
+                  >
+                    {todo.title}
+                  </button>
+                )}
                 <p className="text-sm text-stone-500">{todo.status}</p>
               </div>
             </li>
