@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import {
+  clearCompletedTodos,
   countTodosByStatus,
   createOpenTodo,
   deleteTodo,
@@ -206,11 +207,7 @@ export default function Home() {
             className="rounded-2xl border border-stone-300 px-4 py-2 text-sm font-medium text-stone-600 transition hover:border-stone-400 hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-40"
             type="button"
             disabled={todoSummaryCounts.Completed === 0}
-            onClick={() =>
-              setTodos((currentTodos) =>
-                currentTodos.filter((todo) => todo.status !== "Completed"),
-              )
-            }
+            onClick={() => setTodos((currentTodos) => clearCompletedTodos(currentTodos))}
           >
             Clear completed
           </button>

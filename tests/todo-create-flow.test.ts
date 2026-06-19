@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  clearCompletedTodos,
   countTodosByStatus,
   createOpenTodo,
   deleteTodo,
@@ -210,7 +211,7 @@ test("summarizes Open and Completed Todo counts after create, toggle, delete, an
   todos = deleteTodo(todos, 801);
   assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 1 });
 
-  todos = todos.filter((todo) => todo.status !== "Completed");
+  todos = clearCompletedTodos(todos);
   assert.deepEqual(countTodosByStatus(todos), { Open: 1, Completed: 0 });
 });
 
@@ -290,3 +291,46 @@ function createMemoryStorage(): Pick<Storage, "getItem" | "setItem"> {
     },
   };
 }
+
+
+test("clears all Completed Todos while preserving Open Todos", () => {
+  const todos: Todo[] = [
+    { id: 1101, title: "Keep newest open", status: "Open", createdAt: 1101 },
+    { id: 1102, title: "Remove older completed", status: "Completed", createdAt: 1102 },
+    { id: 1103, title: "Keep older open", status: "Open", createdAt: 1103 },
+    { id: 1104, title: "Remove newest completed", status: "Completed", createdAt: 1104 },
+  ];
+
+  const nextTodos = clearCompletedTodos(todos);
+
+  assert.deepEqual(
+    filterTodosForDisplay(nextTodos, "All").map((todo) => todo.title),
+    ["Keep older open", "Keep newest open"],
+  );
+  assert.deepEqual(filterTodosForDisplay(nextTodos, "Completed"), []);
+  assert.deepEqual(countTodosByStatus(nextTodos), { Open: 2, Completed: 0 });
+});
+
+test("persists cleared Completed Todos so they do not return after reload", () => {
+  const storage = createMemoryStorage();
+  const todos: Todo[] = [
+    { id: 1201, title: "Keep after reload", status: "Open", createdAt: 1201 },
+    { id: 1202, title: "Clear before reload", status: "Completed", createdAt: 1202 },
+  ];
+
+  const clearedTodos = clearCompletedTodos(todos);
+  saveTodosToStorage(storage, clearedTodos);
+
+  assert.deepEqual(loadTodosFromStorage(storage), [
+    { id: 1201, title: "Keep after reload", status: "Open", createdAt: 1201 },
+  ]);
+});
+
+test("clear completed is a no-op when there are no Completed Todos", () => {
+  const todos: Todo[] = [
+    { id: 1301, title: "Only open", status: "Open", createdAt: 1301 },
+  ];
+
+  assert.deepEqual(clearCompletedTodos(todos), todos);
+  assert.equal(countTodosByStatus(todos).Completed, 0);
+});
