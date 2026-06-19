@@ -16,6 +16,7 @@ import {
   deleteTodo,
   filters,
   filterTodosForDisplay,
+  getEmptyStateMessage,
   loadTodosFromStorage,
   saveTodosToStorage,
   toggleTodoStatus,
@@ -77,6 +78,9 @@ export default function Home() {
   const visibleTodos = useMemo(() => {
     return filterTodosForDisplay(todos, filter);
   }, [filter, todos]);
+
+  const emptyStateMessage =
+    visibleTodos.length === 0 ? getEmptyStateMessage(todos, filter) : null;
 
   function addTodo(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -272,9 +276,9 @@ export default function Home() {
           ))}
         </ul>
 
-        {visibleTodos.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-stone-300 p-8 text-center text-stone-500">
-            No Todos to show for {filter}.
+        {emptyStateMessage ? (
+          <div className="rounded-2xl border border-dashed border-stone-300 p-8 text-center text-sm font-medium text-stone-500 sm:p-10">
+            {emptyStateMessage}
           </div>
         ) : null}
       </section>
