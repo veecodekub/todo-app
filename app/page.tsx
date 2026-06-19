@@ -1,8 +1,15 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 
-import { createOpenTodo, filters, type Filter, type Todo } from "./todo";
+import {
+  createOpenTodo,
+  filters,
+  loadTodosFromStorage,
+  saveTodosToStorage,
+  type Filter,
+  type Todo,
+} from "./todo";
 
 export default function Home() {
   const [todos, setTodos] = useState<Todo[]>([
@@ -27,6 +34,27 @@ export default function Home() {
   ]);
   const [title, setTitle] = useState("");
   const [filter, setFilter] = useState<Filter>("All");
+  const [hasLoadedStoredTodos, setHasLoadedStoredTodos] = useState(false);
+
+  useEffect(() => {
+    const loadStoredTodos = window.setTimeout(() => {
+      const storedTodos = loadTodosFromStorage(window.localStorage);
+
+      if (storedTodos) {
+        setTodos(storedTodos);
+      }
+
+      setHasLoadedStoredTodos(true);
+    }, 0);
+
+    return () => window.clearTimeout(loadStoredTodos);
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedStoredTodos) return;
+
+    saveTodosToStorage(window.localStorage, todos);
+  }, [hasLoadedStoredTodos, todos]);
 
   const openCount = todos.filter((todo) => todo.status === "Open").length;
   const completedCount = todos.length - openCount;
