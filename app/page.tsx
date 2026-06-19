@@ -5,9 +5,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   createOpenTodo,
   filters,
+  filterTodosForDisplay,
   loadTodosFromStorage,
   saveTodosToStorage,
-  sortTodosForDisplay,
   toggleTodoStatus,
   type Filter,
   type Todo,
@@ -62,9 +62,7 @@ export default function Home() {
   const completedCount = todos.length - openCount;
 
   const visibleTodos = useMemo(() => {
-    return sortTodosForDisplay(
-      todos.filter((todo) => filter === "All" || todo.status === filter),
-    );
+    return filterTodosForDisplay(todos, filter);
   }, [filter, todos]);
 
   function addTodo(event: FormEvent<HTMLFormElement>) {
